@@ -12,6 +12,7 @@
 <p align="center">
   Your personal growth companion — capture knowledge, build understanding, master what you learn<br>
   <b>From scattered information to structured mastery.</b>
+  <b>Base on OpenWiKi https://github.com/kdsz001/OpenWiki.</b>
 </p>
 
 <p align="center">
@@ -25,17 +26,18 @@
 
 ## Screenshots
 
-| Content Capture | Knowledge Base |
-|:---:|:---:|
+|             Content Capture              |           Knowledge Base           |
+| :--------------------------------------: | :--------------------------------: |
 | ![Content](docs/screenshots/content.png) | ![Wiki](docs/screenshots/wiki.png) |
 
-| Knowledge Graph | Deep Insights |
-|:---:|:---:|
+|           Knowledge Graph            |               Deep Insights                |
+| :----------------------------------: | :----------------------------------------: |
 | ![Graph](docs/screenshots/graph.png) | ![Insights](docs/screenshots/insights.png) |
 
 ## Features
 
 ### 📋 Capture Popup
+
 - A popup appears on your desktop when you copy something (auto-dismisses after 10 seconds)
 - **Only content you actively choose to keep gets saved** — no silent hoarding
 - Supports text, images, and URLs with automatic source app detection
@@ -43,12 +45,14 @@
 - `⌘⇧C` on macOS or `Ctrl+Shift+C` on Windows to manually trigger the capture window
 
 ### 📂 Content Management
+
 - Filter by type (text / image / link) and time range
 - Global search across content and knowledge base
 - Calendar timeline view — browse history by day
 - One-click export to Markdown
 
 ### 🧠 AI Knowledge Base
+
 - AI automatically compiles captured content into Wiki pages (concepts, entities, topics)
 - Knowledge graph visualization — see how ideas connect
 - **Ask sidebar** — ask questions about your knowledge base, AI answers based on your content
@@ -66,17 +70,20 @@
 - **Knowledge health** — visual dashboard showing what needs review and what's mastered
 
 ### 📊 Insight Reports
+
 - One-click AI weekly report summarizing captured content
 - **Attention analysis** — 7-dimension insights into your information habits:
-    - At a Glance / Subconscious / Graveyard / Blind Spots / Hot Topics / Heatmap / Action Items
+  - At a Glance / Subconscious / Graveyard / Blind Spots / Hot Topics / Heatmap / Action Items
 - Like or dismiss report items — AI learns your preferences
 
 ### ⚙️ AI Providers
+
 - Supports **Anthropic (Claude)** / **OpenAI** / **Google Gemini**
 - API Key or OAuth login — two ways to connect
 - Choose different models for each provider
 
 ### 🖥 Desktop Experience
+
 - System tray — closing the window keeps the app running
 - `⌘⇧Y` on macOS or `Ctrl+Shift+Y` on Windows to show the main window
 - Dark / Light / System theme
@@ -116,13 +123,14 @@ The Windows build is unsigned, so Microsoft Defender SmartScreen may warn on fir
 
 These features require additional tools. Other features work without them:
 
-| Feature | Requires | Install |
-|---|---|---|
+| Feature                     | Requires         | Install                                                  |
+| --------------------------- | ---------------- | -------------------------------------------------------- |
 | YouTube subtitle extraction | yt-dlp + Node.js | `pip3 install yt-dlp` + [nodejs.org](https://nodejs.org) |
 
 ## Development
 
 ### Prerequisites
+
 - Node.js 18+
 - Rust (latest stable)
 - macOS 13+ or Windows 10/11
