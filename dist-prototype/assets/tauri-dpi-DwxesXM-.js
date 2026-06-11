@@ -1,0 +1,1 @@
+class c{constructor(s,t){this.width=s,this.height=t}}class h{constructor(s,t){this.x=s,this.y=t}}class o{constructor(s,t){this.width=s,this.height=t}}class r{constructor(s,t){this.x=s,this.y=t}}export{h as LogicalPosition,c as LogicalSize,r as PhysicalPosition,o as PhysicalSize};

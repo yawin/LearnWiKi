@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "LearnWiki",
+  "version": "0.0.1",
+  "identifier": "com.learnwiki.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "",
+        "url": "/",
+        "width": 1200,
+        "height": 850,
+        "resizable": true,
+        "decorations": true,
+        "transparent": true,
+        "visible": false,
+        "center": true
+      },
+      {
+        "label": "spotlight",
+        "title": "",
+        "url": "/spotlight",
+        "width": 520,
+        "height": 80,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "visible": false,
+        "center": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self' ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost; style-src 'self' 'unsafe-inline'",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**/*"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": false,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": {
+      "scripts/*": "scripts/",
+      "resources/markitdown/**/*": "markitdown/"
+    },
+    "macOS": {
+      "infoPlist": "./Info.plist",
+      "entitlements": "./entitlements.plist",
+      "dmg": {
+        "background": "resources/dmg_background.tiff",
+        "windowSize": { "width": 660, "height": 400 },
+        "appPosition": { "x": 180, "y": 170 },
+        "applicationFolderPosition": { "x": 480, "y": 170 }
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk5NDg2NzA3NTQxODQ1MTcKUldRWFJSaFVCMmRJbVNhcG8wRXBxdXVuMkdhSjE5L0g5ajg5YmpOYmFsVWNoOHNoeVBxejlORFAK",
+      "endpoints": [
+        "https://github.com/kdsz001/LearnWiki/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}

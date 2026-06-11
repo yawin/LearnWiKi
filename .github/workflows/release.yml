@@ -1,0 +1,226 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Prepare bundled document converter
+        shell: pwsh
+        run: ./src-tauri/scripts/setup_markitdown.ps1
+
+      - name: Enable updater artifacts when signing key is configured
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
+            Write-Host "TAURI_SIGNING_PRIVATE_KEY is not configured; updater artifacts stay disabled."
+            exit 0
+          }
+          $path = "src-tauri/tauri.conf.json"
+          $json = Get-Content $path -Raw | ConvertFrom-Json
+          $json.bundle.createUpdaterArtifacts = $true
+          $json | ConvertTo-Json -Depth 100 | Set-Content $path -Encoding UTF8
+
+      - name: Prepare release body
+        id: release_body
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $notesFile = "release-notes/$tag.md"
+          $body = if (Test-Path $notesFile) {
+            Get-Content $notesFile -Raw
+          } else {
+            "OpenWiki $tag Released!`n`nSee the repository for details."
+          }
+          "body<<RELEASE_BODY_EOF" >> $env:GITHUB_OUTPUT
+          $body >> $env:GITHUB_OUTPUT
+          "RELEASE_BODY_EOF" >> $env:GITHUB_OUTPUT
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'OpenWiki ${{ github.ref_name }}'
+          releaseBody: ${{ steps.release_body.outputs.body }}
+          releaseDraft: false
+          prerelease: false
+
+  build-macos:
+    name: Build macOS (${{ matrix.label }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        include:
+          - label: Apple Silicon
+            os: macos-latest
+            rust_target: aarch64-apple-darwin
+          - label: Intel
+            os: macos-15-intel
+            rust_target: x86_64-apple-darwin
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Prepare bundled document converter
+        run: ./src-tauri/scripts/setup_markitdown.sh
+
+      - name: Import code signing certificate
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
+          p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+
+      # Bundled helper binaries (OCR Swift helper + MarkItDown converter)
+      # must be signed with hardened runtime + secure timestamp BEFORE the
+      # main app is bundled, otherwise notarization rejects the .app for
+      # containing unsigned executables.
+      - name: Compile and sign bundled helper binaries
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        run: |
+          set -e
+          # Pre-compile the OCR Swift helper (build.rs would do this inside
+          # tauri-action, but we need it signed before bundling).
+          /usr/bin/swiftc -O \
+            src-tauri/resources/openwiki_ocr.swift \
+            -o src-tauri/resources/openwiki_ocr_bin
+
+          ENT=src-tauri/entitlements.plist
+          for binary in \
+            src-tauri/resources/openwiki_ocr_bin \
+            src-tauri/resources/markitdown/openwiki-markitdown \
+            src-tauri/resources/markitdown/bin/openwiki-markitdown; do
+            if [ -f "$binary" ]; then
+              echo "Signing $binary"
+              codesign --force --options=runtime --timestamp \
+                --sign "$APPLE_SIGNING_IDENTITY" \
+                --entitlements "$ENT" \
+                "$binary"
+              codesign --verify --verbose=2 "$binary"
+            else
+              echo "Helper binary not found at $binary — skipping"
+            fi
+          done
+
+          if [ ! -x src-tauri/resources/markitdown/openwiki-markitdown ] && \
+             [ ! -x src-tauri/resources/markitdown/bin/openwiki-markitdown ]; then
+            echo "MarkItDown helper is missing from both expected bundle paths"
+            exit 1
+          fi
+
+      # Read per-version release notes from release-notes/<tag>.md.
+      # Claude maintains this file (see release-notes/README.md); if it's
+      # missing we fall back to a minimal generic body so the release still
+      # publishes successfully.
+      - name: Prepare release body
+        id: release_body
+        shell: bash
+        run: |
+          TAG="${{ github.ref_name }}"
+          NOTES_FILE="release-notes/${TAG}.md"
+          EOF_MARKER="RELEASE_BODY_EOF_$(date +%s%N)"
+          {
+            echo "body<<${EOF_MARKER}"
+            if [ -f "$NOTES_FILE" ]; then
+              cat "$NOTES_FILE"
+            else
+              echo "OpenWiki ${TAG} Released!"
+              echo ""
+              echo "See the repository for details."
+            fi
+            echo "${EOF_MARKER}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Enable updater artifacts when signing key is configured
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+            echo "TAURI_SIGNING_PRIVATE_KEY is not configured; updater artifacts stay disabled."
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("src-tauri/tauri.conf.json")
+          data = json.loads(path.read_text())
+          data["bundle"]["createUpdaterArtifacts"] = True
+          path.write_text(json.dumps(data, indent=2) + "\n")
+          PY
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'OpenWiki ${{ github.ref_name }}'
+          releaseBody: ${{ steps.release_body.outputs.body }}
+          releaseDraft: false
+          prerelease: false
+          args: --target ${{ matrix.rust_target }}

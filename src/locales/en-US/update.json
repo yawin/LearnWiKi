@@ -1,0 +1,40 @@
+{
+  "banner": {
+    "title": "LearnWiki {{version}} is available",
+    "subtitle": "Current version {{current}}",
+    "install": "Update now",
+    "downloadFallback": "Download update",
+    "downloading": "Downloading…",
+    "installing": "Installing…",
+    "view": "Release notes",
+    "later": "Later",
+    "close": "Close",
+    "failed": "Update failed: {{error}}",
+    "failedFallback": "Automatic update is unavailable right now. Please use the release page to download the update manually."
+  },
+  "dialog": {
+    "title": "Update ready",
+    "body": "LearnWiki {{version}} has been downloaded. Install it and restart now?",
+    "install": "Install and restart",
+    "installing": "Installing…",
+    "later": "Later",
+    "view": "Release notes",
+    "close": "Close",
+    "failedTitle": "Automatic update is unavailable",
+    "failedBody": "LearnWiki ran into a problem while installing the update: {{error}}. You can download it manually from the release page.",
+    "downloadFallback": "Download update"
+  },
+  "settings": {
+    "sectionTitle": "App updates",
+    "sectionDescription": "Notifies you when a new version is published on GitHub Releases",
+    "currentVersion": "Current version",
+    "latestVersion": "Latest version",
+    "checking": "Checking…",
+    "upToDate": "You're on the latest version ✓",
+    "autoCheckLabel": "Check for updates automatically on launch",
+    "autoCheckHint": "Silently checks GitHub for a new version each time the app starts",
+    "checkNow": "Check for updates now",
+    "viewReleases": "View release notes ↗",
+    "checkFailed": "Check failed: {{error}}"
+  }
+}

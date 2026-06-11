@@ -1,0 +1,40 @@
+{
+  "banner": {
+    "title": "LearnWiki {{version}} 已发布",
+    "subtitle": "当前版本 {{current}}",
+    "install": "立即升级",
+    "downloadFallback": "前往下载",
+    "downloading": "下载中…",
+    "installing": "安装中…",
+    "view": "查看更新内容",
+    "later": "稍后",
+    "close": "关闭",
+    "failed": "升级失败：{{error}}",
+    "failedFallback": "自动升级暂时不可用，请改为从发布页手动下载安装"
+  },
+  "dialog": {
+    "title": "新版本已准备好",
+    "body": "LearnWiki {{version}} 已下载完成。现在安装并重启吗？",
+    "install": "安装并重启",
+    "installing": "正在安装…",
+    "later": "稍后",
+    "view": "查看更新内容",
+    "close": "关闭",
+    "failedTitle": "自动更新暂时不可用",
+    "failedBody": "安装更新时遇到问题：{{error}}。你可以前往发布页手动下载安装。",
+    "downloadFallback": "前往下载"
+  },
+  "settings": {
+    "sectionTitle": "软件更新",
+    "sectionDescription": "通过 GitHub Releases 获取新版本通知",
+    "currentVersion": "当前版本",
+    "latestVersion": "最新版本",
+    "checking": "检查中…",
+    "upToDate": "已是最新版本 ✓",
+    "autoCheckLabel": "启动时自动检查更新",
+    "autoCheckHint": "每次启动应用时静默检查 GitHub 是否有新版本",
+    "checkNow": "立即检查更新",
+    "viewReleases": "查看发布记录 ↗",
+    "checkFailed": "检查失败：{{error}}"
+  }
+}

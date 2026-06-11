@@ -1,0 +1,40 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: rounded square -->
+  <rect x="32" y="32" width="960" height="960" rx="200" ry="200" fill="#1C1917"/>
+
+  <!-- Inner gradient circle (warm glow) -->
+  <defs>
+    <radialGradient id="glow" cx="512" cy="400" r="350" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F97316" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#F97316" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="arrowGrad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#FB923C"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="512" cy="400" r="380" fill="url(#glow)"/>
+
+  <!-- Mountain / Target - three stacked peaks representing goals -->
+  <!-- Left peak (small goal achieved) -->
+  <path d="M256 720 L380 420 L504 720Z" fill="#F97316" opacity="0.25"/>
+  <!-- Right peak (medium goal) -->
+  <path d="M520 720 L620 380 L720 720Z" fill="#F97316" opacity="0.4"/>
+  <!-- Center peak (main goal, tallest) -->
+  <path d="M416 720 L512 320 L608 720Z" fill="#F97316" opacity="0.75"/>
+
+  <!-- Target rings on the main peak (representing focus and precision) -->
+  <circle cx="512" cy="440" r="48" stroke="#F97316" stroke-opacity="0.5" stroke-width="6" fill="none"/>
+  <circle cx="512" cy="440" r="28" stroke="#F97316" stroke-opacity="0.8" stroke-width="6" fill="none"/>
+  <circle cx="512" cy="440" r="8" fill="#F97316"/>
+
+  <!-- Upward arrow / growth path -->
+  <path d="M512 760 L512 510" stroke="url(#arrowGrad)" stroke-width="10" stroke-linecap="round"/>
+  <path d="M460 560 L512 500 L564 560" stroke="url(#arrowGrad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Small sparkle / achievement dots -->
+  <circle cx="440" cy="380" r="5" fill="#F97316" opacity="0.6"/>
+  <circle cx="590" cy="360" r="4" fill="#F97316" opacity="0.5"/>
+  <circle cx="480" cy="300" r="3" fill="#F97316" opacity="0.4"/>
+</svg>

@@ -1,0 +1,36 @@
+<svg width="1200" height="260" viewBox="0 0 1200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1C1917"/>
+      <stop offset="100%" stop-color="#292524"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="260" rx="16" fill="url(#bg)"/>
+
+  <!-- Growth arcs (like rings of a tree, representing growth over time) -->
+  <circle cx="980" cy="130" r="75" stroke="#F97316" stroke-opacity="0.06" stroke-width="1.5" fill="none"/>
+  <circle cx="980" cy="130" r="55" stroke="#F97316" stroke-opacity="0.10" stroke-width="1.5" fill="none"/>
+  <circle cx="980" cy="130" r="35" stroke="#F97316" stroke-opacity="0.16" stroke-width="1.5" fill="none"/>
+
+  <!-- Book/Pages icon (left of title) -->
+  <g transform="translate(280, 100)">
+    <!-- Left page -->
+    <path d="M0 8C0 4 4 0 8 0H35V60H8C4 60 0 56 0 52V8Z" fill="#F97316" opacity="0.85"/>
+    <!-- Right page -->
+    <path d="M40 0H67C71 0 75 4 75 8V52C75 56 71 60 67 60H40V0Z" fill="#F97316" opacity="0.5"/>
+    <!-- Spine -->
+    <line x1="37" y1="0" x2="37" y2="60" stroke="#1C1917" stroke-width="2"/>
+  </g>
+
+  <!-- Title -->
+  <text x="440" y="128" font-family="'Cabinet Grotesk', Arial, Helvetica, sans-serif" font-weight="800" font-size="60" fill="#FFF7ED" letter-spacing="-1">Learn</text>
+  <text x="620" y="128" font-family="'Cabinet Grotesk', Arial, Helvetica, sans-serif" font-weight="800" font-size="60" fill="#F97316" letter-spacing="-1">Wiki</text>
+
+  <!-- Subtitle -->
+  <text x="827" y="172" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="400" font-size="15" fill="#A8A29E" letter-spacing="4">GROW · LEARN · MASTER</text>
+
+  <!-- Tech stack -->
+  <text x="827" y="215" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="400" font-size="12" fill="#57534E" letter-spacing="2">TAURI 2 · REACT · RUST · SQLITE · PRIVACY FIRST</text>
+</svg>

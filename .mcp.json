@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "openspec": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "openspec-mcp"
+      ],
+      "env": {}
+    },
+    "agentmemory": {
+      "type": "stdio",
+      "command": "agentmemory",
+      "args": [
+        "mcp"
+      ],
+      "env": {}
+    }
+  }
+}
