@@ -143,6 +143,18 @@ Missing any one causes silent runtime failure — the plugin simply does nothing
 Item 3 is the most dangerous — it passes all compile-time checks and fails silently at runtime.
 After adding any plugin, run `npm run tauri dev` and manually verify its functionality works.
 
+### Pre-Commit Checklist
+
+Before ANY `git commit`, run these 4 checks. Do NOT skip any:
+
+```bash
+npx tsc -b              # MUST use -b (not --noEmit) — catches strict project reference errors
+npx vitest run          # all tests must pass
+cargo check --manifest-path src-tauri/Cargo.toml  # Rust compilation
+```
+
+After committing, CodeGraph auto-indexes via a PostToolUse hook. If querying CodeGraph within 2 seconds of a commit, run `codegraph index` manually — the file watcher has ~500ms debounce delay.
+
 ### Async Data Null-Safety Rule
 
 Any component that loads async data into `useState<T | null>` MUST handle the null path.
