@@ -24,16 +24,6 @@
   <a href="README.zh-CN.md">中文文档</a>
 </p>
 
-## Screenshots
-
-|             Content Capture              |           Knowledge Base           |
-| :--------------------------------------: | :--------------------------------: |
-| ![Content](docs/screenshots/content.png) | ![Wiki](docs/screenshots/wiki.png) |
-
-|           Knowledge Graph            |               Deep Insights                |
-| :----------------------------------: | :----------------------------------------: |
-| ![Graph](docs/screenshots/graph.png) | ![Insights](docs/screenshots/insights.png) |
-
 ## Features
 
 ### 📋 Capture Popup
@@ -91,11 +81,7 @@
 
 ## Download
 
-- macOS (Apple Silicon): download `LearnWiki_X.Y.Z_aarch64.dmg`
-- macOS (Intel): download `LearnWiki_X.Y.Z_x64.dmg`
-- Windows (x64): download `LearnWiki_X.Y.Z_x64-setup.exe` (recommended) or `LearnWiki_X.Y.Z_x64_en-US.msi`
-
-👉 [Go to Releases](https://github.com/kdsz001/LearnWiki/releases)
+TBC
 
 ### ⚠️ First Launch Guide (Important)
 
@@ -141,7 +127,7 @@ These features require additional tools. Other features work without them:
 
 ```bash
 # Clone the repo
-git clone https://github.com/kdsz001/LearnWiki.git
+git clone https://github.com/yawin/LearnWiKi.git
 cd LearnWiki
 
 # Install dependencies

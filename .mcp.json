@@ -1,5 +1,15 @@
 {
   "mcpServers": {
+    "codegraph": {
+      "type": "stdio",
+      "command": "codegraph",
+      "args": [
+        "mcp",
+        "--port",
+        "3113"
+      ],
+      "env": {}
+    },
     "openspec": {
       "type": "stdio",
       "command": "npx",

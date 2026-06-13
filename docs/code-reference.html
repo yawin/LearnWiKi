@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LearnWiki v0.0.1 — 代码参考文档</title>
+<style>
+:root { --bg:#FAFAF8; --surface:#FFF; --border:#E7E5E4; --text:#1C1917; --text2:#57534E; --muted:#A8A29E; --orange:#F97316; --orange-hover:#EA580C; --green:#16A34A; --red:#DC2626; --amber:#CA8A04; --blue:#2563EB; --code-bg:#F5F5F0; }
+@media(prefers-color-scheme:dark){ :root { --bg:#0C0A09; --surface:#1C1917; --border:#3D3935; --text:#FAFAF8; --text2:#A8A29E; --muted:#78716C; --code-bg:#292524; }}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Plus Jakarta Sans',-apple-system,sans-serif; background:var(--bg); color:var(--text); line-height:1.7; font-size:14px; }
+.container { max-width:820px; margin:0 auto; padding:40px 20px 80px; }
+h1 { font-family:'Cabinet Grotesk',sans-serif; font-size:32px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px; }
+h2 { font-family:'Cabinet Grotesk',sans-serif; font-size:22px; font-weight:700; margin:40px 0 16px; padding-bottom:8px; border-bottom:2px solid var(--orange); letter-spacing:-0.3px; }
+h3 { font-size:16px; font-weight:700; margin:24px 0 12px; color:var(--text); }
+h4 { font-size:14px; font-weight:600; margin:16px 0 8px; color:var(--text2); }
+p { margin:8px 0; color:var(--text2); }
+a { color:var(--orange); text-decoration:none; }
+pre { background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:14px 18px; overflow-x:auto; margin:10px 0; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.6; }
+code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--code-bg); padding:1px 5px; border-radius:4px; color:var(--orange); }
+pre code { background:none; padding:0; color:var(--text); }
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; margin-right:4px; }
+.tag-rs { background:#FEE2E2; color:#991B1B; }
+.tag-ts { background:#DBEAFE; color:#1E40AF; }
+.tag-db { background:#DCFCE7; color:#166534; }
+.tag-ai { background:#FEF3C7; color:#92400E; }
+.filepath { color:var(--muted); font-size:11px; margin:4px 0 0; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; margin:16px 0; }
+.card h3 { margin-top:0; }
+.flow { background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin:12px 0; font-family:'JetBrains Mono',monospace; font-size:11px; line-height:1.8; white-space:pre; }
+table { width:100%; border-collapse:collapse; margin:12px 0; font-size:12px; }
+th, td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+th { font-weight:600; color:var(--text); background:var(--code-bg); }
+.toc { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; margin:16px 0; }
+.toc a { display:block; padding:3px 0; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>LearnWiki v0.0.1</h1>
+<p>代码参考文档 · 生成于 2026-06-12 · <a href="#ai-prompts">AI 提示词组织</a></p>
+
+<nav class="toc">
+<h3>目录</h3>
+<a href="#architecture">1. 架构总览</a>
+<a href="#tech-stack">2. 技术栈</a>
+<a href="#backend">3. 后端模块 (Rust · 63 files)</a>
+<a href="#frontend">4. 前端模块 (React/TypeScript · 85 files)</a>
+<a href="#data-model">5. 数据模型与表结构</a>
+<a href="#key-flows">6. 关键业务流程</a>
+<a href="#ai-prompts">7. AI 提示词组织</a>
+<a href="#plugins">8. Tauri 插件清单</a>
+</nav>
+
+<!-------------------------------------------------------------------->
+<h2 id="architecture">1. 架构总览</h2>
+
+<div class="flow">┌─────────────────────────────────────────────────────────────┐
+│                    LearnWiki (Tauri 2)                       │
+│                                                              │
+│  ┌────────────────────┐    ┌──────────────────────────────┐  │
+│  │   React Frontend   │◄──►│   Rust Backend (src-tauri)    │  │
+│  │   (Vite + TS)      │IPC │                              │  │
+│  │                    │    │  ┌──────────┐ ┌────────────┐ │  │
+│  │  App.tsx           │    │  │ Commands │ │ AI Engine   │ │  │
+│  │  ├─ ContentList    │    │  │ capture  │ │ client.rs   │ │  │
+│  │  ├─ WikiView       │    │  │ wiki     │ │ prompts.rs  │ │  │
+│  │  ├─ LearningView   │    │  │ review   │ │ wiki_prompt │ │  │
+│  │  ├─ DigestView     │    │  │ goal     │ │ gemini_api  │ │  │
+│  │  ├─ SettingsView   │    │  │ exam     │ │ codex_api   │ │  │
+│  │  └─ ReportView     │    │  │ report   │ └────────────┘ │  │
+│  │                    │    │  │ ...      │ ┌────────────┐ │  │
+│  │  Services/         │    │  └──────────┘ │ Capture     │ │  │
+│  │  Stores (Zustand)  │    │               │ clipboard   │ │  │
+│  │  Types/            │    │  ┌──────────┐ │ screenshot  │ │  │
+│  │  i18n (zh/en)      │    │  │ Storage  │ │ ocr         │ │  │
+│  └────────────────────┘    │  │ SQLite   │ │ url_reader  │ │  │
+│                             │  │ models   │ └────────────┘ │  │
+│                             │  │ repos    │                │  │
+│                             │  └──────────┘                │  │
+│                             └──────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘</div>
+
+<div class="card">
+<h3>项目结构</h3>
+<pre>/learnwiki/
+├── src/                        # React 前端
+│   ├── features/               # 功能模块 (按领域)
+│   │   ├── content-list/       # 内容列表
+│   │   ├── wiki/               # 知识库 (浏览/图/详情)
+│   │   ├── learning/           # 学习系统 (目标/复习/考试)
+│   │   ├── digest/             # 洞察报告
+│   │   ├── data-hub/           # 数据中枢
+│   │   ├── weekly-report/      # 周报
+│   │   ├── discovery/          # 知识发现
+│   │   ├── settings/           # 设置
+│   │   ├── update/             # 应用更新
+│   │   ├── spotlight/          # Spotlight 搜索
+│   │   └── automation/         # 自动化
+│   ├── components/             # 共享组件
+│   ├── services/               # Tauri invoke 封装
+│   ├── stores/                 # Zustand 状态管理
+│   └── types/                  # TypeScript 类型
+├── src-tauri/src/              # Rust 后端
+│   ├── ai/                     # AI 引擎 (提示词/API)
+│   ├── capture/                # 内容捕获 (剪贴板/截图)
+│   ├── commands/               # Tauri 命令处理器
+│   ├── discovery/              # 知识发现引擎
+│   ├── export/                 # Markdown 导出
+│   ├── matching/               # 关键词匹配
+│   ├── scheduler/              # 定时任务
+│   ├── storage/                # SQLite 存储层
+│   └── update/                 # 应用更新
+└── src-tauri/src/storage/migrations/  # 36 个迁移脚本</pre>
+</div>
+
+<!-------------------------------------------------------------------->
+<h2 id="tech-stack">2. 技术栈</h2>
+
+<div class="card">
+<table>
+<tr><th>层</th><th>技术</th><th>说明</th></tr>
+<tr><td>桌面框架</td><td>Tauri 2</td><td>Rust 驱动的跨平台桌面框架，替换 Electron</td></tr>
+<tr><td>前端渲染</td><td>React 19 + Vite 6</td><td>函数组件 + Hooks，自动 JSX Transform</td></tr>
+<tr><td>样式</td><td>Tailwind CSS 4</td><td>仅用 utility classes，无自定义 CSS</td></tr>
+<tr><td>状态管理</td><td>Zustand</td><td>轻量 store，精确 selector</td></tr>
+<tr><td>动画</td><td>Framer Motion</td><td>微动效 (短时，功能性)</td></tr>
+<tr><td>图标</td><td>Lucide React</td><td>统一图标库，禁止 emoji</td></tr>
+<tr><td>国际化</td><td>react-i18next</td><td>中/英双语</td></tr>
+<tr><td>数据库</td><td>SQLite (rusqlite)</td><td>WAL 模式，本地文件存储</td></tr>
+<tr><td>AI 客户端</td><td>Anthropic / OpenAI / Gemini</td><td>多 Provider 支持</td></tr>
+<tr><td>测试</td><td>Vitest + Playwright</td><td>单元 + 集成 + E2E</td></tr>
+</table>
+</div>
+
+<!-------------------------------------------------------------------->
+<h2 id="backend">3. 后端模块 (Rust)</h2>
+
+<div class="card">
+<h3>3.1 AI 引擎 <span class="tag tag-ai">ai/</span></h3>
+<table>
+<tr><th>文件</th><th>职责</th></tr>
+<tr><td><code>mod.rs</code></td><td>模块入口，声明 13 个子模块</td></tr>
+<tr><td><code>client.rs</code></td><td>AI 客户端：Provider 路由 (Anthropic/OpenAI/Gemini)，HTTP 调用，Token 管理</td></tr>
+<tr><td><code>prompts.rs</code></td><td>通用提示词：周报生成、内容摘要、话题提取</td></tr>
+<tr><td><code>wiki_prompts.rs</code></td><td>Wiki 提示词：编译发现、编译执行、查询检索、查询回答、评估、纠错</td></tr>
+<tr><td><code>report_generator.rs</code></td><td>周报生成器：整合信息、调用 AI、生成结构化报告</td></tr>
+<tr><td><code>wiki_engine.rs</code></td><td>Wiki 引擎：知识图谱重构、内容编译、链接发现</td></tr>
+<tr><td><code>attention_analyzer.rs</code></td><td>注意力分析：7 维度洞察 (概况/潜意识/盲区/热点/热力图等)</td></tr>
+<tr><td><code>preference_engine.rs</code></td><td>偏好学习：根据用户反馈调整 AI 行为</td></tr>
+<tr><td><code>gemini_api.rs</code></td><td>Google Gemini API 实现</td></tr>
+<tr><td><code>codex_api.rs</code></td><td>Codex API 实现</td></tr>
+<tr><td><code>content_filter.rs</code></td><td>内容安全过滤</td></tr>
+<tr><td><code>gemini_oauth.rs</code></td><td>Gemini OAuth 登录流程</td></tr>
+<tr><td><code>oauth.rs</code></td><td>通用 OAuth 登录流程</td></tr>
+<tr><td><code>time_filter.rs</code></td><td>时间范围筛选工具</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>3.2 命令层 <span class="tag tag-rs">commands/</span></h3>
+<table>
+<tr><th>文件</th><th>行数</th><th>主要命令</th></tr>
+<tr><td><code>capture.rs</code></td><td>~1800</td><td>save_content, get_all_content, search_content, delete_content</td></tr>
+<tr><td><code>wiki.rs</code></td><td>~1100</td><td>compile_wiki, get_wiki_pages, get_wiki_graph, lint_wiki</td></tr>
+<tr><td><code>review.rs</code></td><td>~1600</td><td>get_due_reviews, submit_review_feedback, generate_quiz_questions, generate_cloze, generate_explain_review</td></tr>
+<tr><td><code>goal.rs</code></td><td>~600</td><td>create_goal, get_goal_wiki_pages, get_goal_review_sessions, get_review_log, match_wiki_to_goals</td></tr>
+<tr><td><code>exam.rs</code></td><td>~700</td><td>create_exam, get_exam, submit_exam_answer, complete_exam</td></tr>
+<tr><td><code>report.rs</code></td><td>~400</td><td>generate_weekly_report, save_report</td></tr>
+<tr><td><code>digest.rs</code></td><td>~300</td><td>get_undigested_content, update_digest_action</td></tr>
+<tr><td><code>discovery.rs</code></td><td>~200</td><td>run_discovery_for_page, get_discovery_queue</td></tr>
+<tr><td><code>attention.rs</code></td><td>~200</td><td>get_attention_insight, save_attention_insight</td></tr>
+<tr><td><code>datahub.rs</code></td><td>~200</td><td>get_dates_with_content, get_content_for_date</td></tr>
+<tr><td><code>sync.rs</code></td><td>~200</td><td>sync_folders, get_sync_status</td></tr>
+<tr><td><code>ranking.rs</code></td><td>~300</td><td>get_ranking_data, compute_mastery_rank</td></tr>
+<tr><td><code>backup.rs</code></td><td>~200</td><td>export_backup, import_backup, auto_backup</td></tr>
+<tr><td><code>mcp.rs</code></td><td>~100</td><td>MCP 协议集成</td></tr>
+<tr><td><code>sandbox.rs</code></td><td>~100</td><td>代码沙箱执行</td></tr>
+<tr><td><code>preferences.rs</code></td><td>~100</td><td>用户偏好管理</td></tr>
+<tr><td><code>oauth.rs</code></td><td>~100</td><td>OAuth 回调处理</td></tr>
+<tr><td><code>storage.rs</code></td><td>~50</td><td>文件存储</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>3.3 存储层 <span class="tag tag-db">storage/</span></h3>
+<table>
+<tr><th>文件</th><th>行数</th><th>职责</th></tr>
+<tr><td><code>database.rs</code></td><td>~700</td><td>数据库初始化、WAL 模式、36 个迁移执行、CJK 分词函数</td></tr>
+<tr><td><code>models.rs</code></td><td>~950</td><td>所有数据结构定义 (Goal, ReviewSchedule, ReviewLog, Exam, WikiPage 等)</td></tr>
+<tr><td><code>repository.rs</code></td><td>~5600</td><td>核心仓库：所有 CRUD 操作、SQL 查询、SM-2 算法、题型轮转</td></tr>
+<tr><td><code>migrations/</code></td><td>36 个</td><td>增量数据库迁移 (001~036)</td></tr>
+<tr><td><code>tests/</code></td><td>2 个</td><td>学习模块集成测试</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>3.4 捕获模块 <span class="tag tag-rs">capture/</span></h3>
+<table>
+<tr><th>文件</th><th>职责</th></tr>
+<tr><td><code>clipboard.rs</code></td><td>剪贴板监听：文本/图片/URL 捕获，窗口弹出，自动处理</td></tr>
+<tr><td><code>screenshot.rs</code></td><td>截图监听：Mac 快捷指令截图检测</td></tr>
+<tr><td><code>detector.rs</code></td><td>内容检测器：来源应用识别、URL 模式匹配、用户确认弹窗调度</td></tr>
+<tr><td><code>ocr.rs</code></td><td>OCR 识别：macOS 用 Swift 预编译二进制，Windows 用 Windows OCR</td></tr>
+<tr><td><code>url_reader.rs</code></td><td>URL 内容抓取：微信公众号、X(Twitter)、网页全文、YouTube 字幕</td></tr>
+<tr><td><code>content.rs</code></td><td>内容模型与工具函数</td></tr>
+<tr><td><code>sensitive_filter.rs</code></td><td>敏感信息过滤</td></tr>
+</table>
+</div>
+
+<!-------------------------------------------------------------------->
+<h2 id="frontend">4. 前端模块 (React/TypeScript)</h2>
+
+<div class="card">
+<h3>4.1 学习系统 <span class="tag tag-ts">features/learning/</span></h3>
+<table>
+<tr><th>组件</th><th>职责</th></tr>
+<tr><td><code>LearningView.tsx</code></td><td>路由控制器：view 状态机 (dashboard/goal/review/reviewQuiz/reviewLog/exam)</td></tr>
+<tr><td><code>LearningDashboard.tsx</code></td><td>学习首页：目标列表 + 创建目标</td></tr>
+<tr><td><code>GoalDetail.tsx</code></td><td>目标详情：知识点三组列表、复习概览、考试区、复习记录</td></tr>
+<tr><td><code>GoalList.tsx</code></td><td>目标卡片网格：2 列布局，实时进度计算</td></tr>
+<tr><td><code>GoalCreate.tsx</code></td><td>创建目标：标题 + 描述表单</td></tr>
+<tr><td><code>ReviewQuiz.tsx</code></td><td>选择题复习：AI 生成 4 题 → 用户作答 → 自动评分 → 存储 snapshot</td></tr>
+<tr><td><code>ReviewSession.tsx</code></td><td>全局复习会话 (已废弃，仅保留兼容)</td></tr>
+<tr><td><code>ExamSession.tsx</code></td><td>考试流程：出题 → 作答 → 提交 → 报告</td></tr>
+<tr><td><code>ExamReport.tsx</code></td><td>考试报告：分数、等级、每题详情</td></tr>
+<tr><td><code>ReviewLogDetail.tsx</code></td><td>复习记录详情：时间、题型、结果、间隔变化、难度系数</td></tr>
+<tr><td><code>GoalRecommendations.tsx</code></td><td>AI 推荐学习资源</td></tr>
+<tr><td><code>review/StandardReview.tsx</code></td><td>标准复习 UI：知识展示 + 质量评分 + 格式提醒</td></tr>
+<tr><td><code>review/ReviewSummary.tsx</code></td><td>复习结果摘要</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>4.2 知识库 <span class="tag tag-ts">features/wiki/</span></h3>
+<table>
+<tr><th>组件</th><th>职责</th></tr>
+<tr><td><code>WikiView.tsx</code></td><td>知识库总路由：浏览/图谱/详情切换</td></tr>
+<tr><td><code>WikiBrowseView.tsx</code></td><td>知识浏览：卡片列表、类型筛选、搜索</td></tr>
+<tr><td><code>WikiGraphView.tsx</code></td><td>知识图谱：可视化、节点拖拽、边高亮</td></tr>
+<tr><td><code>WikiPageDetail.tsx</code></td><td>知识详情：全文渲染、来源列表、学习轨迹、已阅读切换</td></tr>
+<tr><td><code>WikiAskSidebar.tsx</code></td><td>AI 问答：基于知识库的自然语言查询</td></tr>
+<tr><td><code>WikiLintSection.tsx</code></td><td>知识结构检查：孤页、断链检测</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>4.3 其他前端模块</h3>
+<table>
+<tr><th>领域</th><th>关键组件</th></tr>
+<tr><td>内容管理</td><td>ContentList, ContentCard, ImagePreview, SyncButton</td></tr>
+<tr><td>数据中枢</td><td>DataHubView, DateSidebar, DayDetail, ExportPanel</td></tr>
+<tr><td>洞察</td><td>DigestView, DigestCard, InsightDetail, RadarView</td></tr>
+<tr><td>周报</td><td>ReportView, ReportCard, ReportSummary, ActivityStatsCard</td></tr>
+<tr><td>发现</td><td>ReadingInbox, DiscoveryCard, MonitorConfig, RssFeedConfig</td></tr>
+<tr><td>设置</td><td>SettingsView, BackupSection, LearningSection, SyncFoldersSection</td></tr>
+<tr><td>更新</td><td>UpdateBanner (顶部更新提醒)</td></tr>
+<tr><td>Spotlight</td><td>SpotlightView (⌘⇧Y 弹窗)</td></tr>
+<tr><td>自动化</td><td>AutomationNotices, PreAuthModal</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>4.4 服务层与状态管理</h3>
+<table>
+<tr><th>类型</th><th>文件</th></tr>
+<tr><td>Service</td><td>learningService, wikiService, settingsService, reportService, digestService, dataHubService, syncService, backupService, updateService, automationService, rankingService, radarService, storageService</td></tr>
+<tr><td>Store</td><td>learningStore, wikiStore, settingsStore, contentStore, dataHubStore, digestStore, reportStore, radarStore</td></tr>
+<tr><td>Type</td><td>learning.ts, wiki.ts, content.ts, report.ts, sync.ts, backup.ts</td></tr>
+</table>
+</div>
+
+<!-------------------------------------------------------------------->
+<h2 id="data-model">5. 数据模型与表结构</h2>
+
+<div class="card">
+<h3>5.1 核心表关系</h3>
+<div class="flow">captured_content ─────────────────────────────────────────
+     │
+     ├──(AI 编译)──► wiki_pages ◄──(匹配)──► goal_wiki_links
+     │                    │                        │
+     │                    │                        ▼
+     │                    │                   review_schedule
+     │                    │                        │
+     │                    │                        ▼
+     │                    │                   review_logs
+     │                    │                        │
+     │                    │                (session_id 聚合)
+     │                    │                        │
+     │                    └──(考试)──► exams ──► exam_questions
+     │                                              │
+     └──(AI 周报)──► weekly_reports          exam_answers</div>
+</div>
+
+<div class="card">
+<h3>5.2 关键表一览</h3>
+<table>
+<tr><th>表名</th><th>说明</th><th>迁移</th></tr>
+<tr><td>captured_content</td><td>捕获的内容 (文本/图片/链接)</td><td>001</td></tr>
+<tr><td>wiki_pages</td><td>AI 编译的知识页面</td><td>008</td></tr>
+<tr><td>wiki_edges</td><td>知识页面间的关联边</td><td>008</td></tr>
+<tr><td>goal_wiki_links</td><td>目标 ↔ 知识页面的关联</td><td>027</td></tr>
+<tr><td>review_schedule</td><td>每个知识页面的复习计划 (SM-2 算法)</td><td>022</td></tr>
+<tr><td>review_logs</td><td>每次复习的详细记录 (含 session_id)</td><td>022+036</td></tr>
+<tr><td>review_format_history</td><td>题型使用历史 (用于轮转算法)</td><td>023</td></tr>
+<tr><td>daily_review_summary</td><td>每日复习汇总</td><td>022</td></tr>
+<tr><td>wiki_reading_status</td><td>知识页面的已读/未读状态</td><td>032</td></tr>
+<tr><td>wiki_mastery_flags</td><td>考试未通过标记 (弱项追踪)</td><td>034</td></tr>
+<tr><td>exams</td><td>考试试卷 (含版本和题型配置)</td><td>028+033</td></tr>
+<tr><td>exam_questions</td><td>考试题目和答案</td><td>028</td></tr>
+<tr><td>goal_recommendations</td><td>AI 推荐的学习资源</td><td>029</td></tr>
+<tr><td>user_preferences</td><td>用户偏好 (AI Provider/模型等)</td><td>001</td></tr>
+<tr><td>weekly_reports</td><td>AI 生成的周报</td><td>001</td></tr>
+<tr><td>attention_insights</td><td>注意力分析洞察</td><td>005</td></tr>
+<tr><td>chat_messages</td><td>AI 问答对话历史</td><td>003</td></tr>
+</table>
+</div>
+
+<!-------------------------------------------------------------------->
+<h2 id="key-flows">6. 关键业务流程</h2>
+
+<div class="card">
+<h3>6.1 学习闭环</h3>
+<div class="flow">  目标创建 ──► AI 自动关联知识点 ──► 用户阅读 (已读切换)
+     │                                        │
+     │                                        ▼
+     │                               review_schedule 创建
+     │                                        │
+     │                                        ▼
+     │                           知识点选择题复习 (ReviewQuiz)
+     │                                   │
+     │                                   ▼
+     │                          submit_review_feedback
+     │                          (SM-2 计算下次复习时间)
+     │                                   │
+     │                                   ▼
+     │                          所有知识点已读+已复习
+     │                                   │
+     └───────────────────────────────────┘
+                                        │
+                                        ▼
+                               考试解锁 (创建试卷)
+                                        │
+                                        ▼
+                               考试答题 → 成绩报告
+                                        │
+                                        ▼
+                               掌握度标记 → 循环复习</div>
+</div>
+
+<div class="card">
+<h3>6.2 内容捕获 → 知识编译</h3>
+<div class="flow">  剪贴板/截图 ──► 弹出确认窗口 ──► 保存到 captured_content
+                                        │
+                                        ▼
+                              AI 编译 (wiki_engine.rs)
+                                   │
+                          ┌────────┼────────┐
+                          ▼        ▼        ▼
+                     评估      发现关联   创建页面
+                   (是否需要  (与现有知识  (实体/概念/
+                    新页面)   建立链接)   主题/对比)
+                                          │
+                                          ▼
+                                    wiki_edges 图谱</div>
+</div>
+
+<div class="card">
+<h3>6.3 复习题型轮转算法 (SM-2 + Format Rotation)</h3>
+<div class="flow">  ALL_FORMATS = ["choice", "judgment", "essay"]
+
+  第 1 次复习 (review_count==0):
+    → 随机选择 "choice" 或 "judgment"
+
+  第 2~3 次 (review_count<=2):
+    → 从未使用的题型中随机选择
+    → 排除 "essay" (需要基础知识)
+
+  第 4+ 次 (review_count>=3):
+    → 排除最近 2 次使用的题型
+    → "essay" 可用 (已具备基础)
+
+  质量反馈 → SM-2 算法:
+    quality=0: 间隔重置为 1 天
+    quality>=1: 间隔×难度系数 (interval × ease_factor)
+    ease_factor: 答对 +0.1, 答错 -0.2, 最低 1.3</div>
+</div>
+
+<!-------------------------------------------------------------------->
+<h2 id="ai-prompts">7. AI 提示词组织</h2>
+
+<div class="card">
+<h3>7.1 提示词架构</h3>
+<p>所有提示词集中在两个文件，按场景划分。每个函数接受 <code>locale</code> 参数实现中英文双语。</p>
+<div class="flow">ai/prompts.rs ──── 通用提示词
+  ├── weekly_report_system_prompt()  周报生成 (系统级)
+  ├── content_summarize_prompt()     内容摘要
+  ├── topic_extraction_prompt()      话题提取
+  └── topic_clustering_prompt()      话题聚类
+
+ai/wiki_prompts.rs ──── Wiki 提示词
+  ├── assessment_system_prompt()     评估：是否需要为新内容创建 Wiki 页面
+  ├── compile_discover_system_prompt() 发现：内容与现有知识的联系
+  ├── compile_execute_system_prompt()  执行：生成页面内容 (标题/摘要/正文)
+  ├── query_retrieve_system_prompt()   检索：从知识库检索相关页面
+  ├── query_answer_system_prompt()     回答：基于检索结果回答问题
+  ├── query_rewrite_system_prompt()    改写：将自然语言问题改写为搜索引擎查询
+  └── lint_system_prompt()             纠错：检测知识库结构问题
+
+ai/client.rs ──── AI 客户端路由
+  └── call(system_prompt, user_message) → Provider 路由
+       ├── Anthropic → call_anthropic()
+       ├── OpenAI    → call_openai()
+       ├── Gemini    → call_gemini()
+       └── OpenRouter → call_openrouter()
+
+commands/review.rs ──── 复习题目生成 (内联提示词)
+  ├── generate_quiz_questions()   选择题出题
+  ├── generate_ordering_steps()   排序题出题
+  ├── generate_error_hunt()       找茬题出题
+  ├── generate_cloze()            填空题出题
+  └── generate_explain_review()   解释题出题</div>
+</div>
+
+<div class="card">
+<h3>7.2 提示词示例</h3>
+
+<h4>Wiki 编译 - 评估 (assessment_system_prompt)</h4>
+<pre>你是一个知识管理助手。分析以下内容片段，判断是否需要为其创建独立的 Wiki 页面。
+
+评估标准：
+1. **实体/概念**：是独立的知识单元（人物、工具、术语、理论）
+2. **可复用性**：在未来可能被其他内容引用
+3. **信息密度**：包含足够的细节值得单独记录
+
+返回 JSON：
+{
+  "needs_page": true/false,
+  "confidence": 0.0-1.0,
+  "title": "建议的页面标题",
+  "page_type": "concept|entity|source|comparison|overview",
+  "reasoning": "简短理由"
+}</pre>
+
+<h4>Wiki 编译 - 执行 (compile_execute_system_prompt)</h4>
+<pre>你是一个知识百科编纂者。为以下主题创建结构化的 Wiki 条目。
+
+页面标题：{title}
+相关材料：{related_contents}
+相关联的页面：{linked_pages}
+
+请生成：
+- 摘要 (50-100 字)
+- 概念阐述 (200-400 字)
+- 详细展开 (300-600 字)
+- 延伸阅读建议
+
+返回 JSON: { "summary": "...", "concept": "...", "detail": "...", "extend": "..." }</pre>
+
+<h4>选择题出题 (generate_quiz_questions)</h4>
+<pre>You are a quiz generator. Generate N multiple-choice question(s)
+with 4 options each, based on the knowledge content provided.
+Each question must have exactly one correct answer.
+
+Return a JSON array:
+[{
+  "stem": "question text",
+  "options": ["A", "B", "C", "D"],
+  "correct_index": 0,
+  "explanation": "why this answer is correct"
+}]</pre>
+
+<h4>周报生成 (weekly_report_system_prompt)</h4>
+<pre>你是一个个人知识助理。基于用户本周捕获的内容，生成周报。
+
+要求：
+- 总结本周的主题趋势
+- 标记重要的发现和洞察
+- 识别可能被忽视的内容
+- 用简洁、亲切的语气
+
+返回 JSON: { "summary": "...", "highlights": [...], ... }</pre>
+</div>
+
+<div class="card">
+<h3>7.3 提示词设计原则</h3>
+<table>
+<tr><th>原则</th><th>说明</th></tr>
+<tr><td>系统/用户分离</td><td>system_prompt 定义角色和规则，user_message 传入具体数据</td></tr>
+<tr><td>JSON 输出约束</td><td>几乎所有提示词要求 JSON 格式输出，便于程序解析</td></tr>
+<tr><td>双语支持</td><td>通过 <code>locale</code> 参数切换中英文角色描述和输出要求</td></tr>
+<tr><td>结构化角色</td><td>每个场景有明确的"人格"定义 (编纂者/出题助手/知识分析师)</td></tr>
+<tr><td>评分标准明确</td><td>如评估提示词列出 confidence 0-1、page_type 枚举等具体约束</td></tr>
+<tr><td>内容分离</td><td>提示词本身不包含具体数据，通过参数注入 wiki 内容/用户数据</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>7.4 AI Provider 路由</h3>
+<div class="flow">AiClient.call(system_prompt, user_message)
+  │
+  ├── PreferenceEngine 查询用户偏好
+  │   ├── Provider: anthropic | openai | gemini | openrouter
+  │   ├── Model: claude-sonnet-4-6 | gpt-4o | gemini-2.5-pro | ...
+  │   └── API Key / OAuth Token
+  │
+  ├── Anthropic → POST https://api.anthropic.com/v1/messages
+  │   ├── Headers: x-api-key, anthropic-version: 2023-06-01
+  │   └── Body: { model, system, messages[], max_tokens }
+  │
+  ├── OpenAI / OpenRouter → POST https://api.openai.com/v1/chat/completions
+  │   ├── Headers: Authorization: Bearer {key}
+  │   └── Body: { model, messages[{role:"system",content},{role:"user",content}] }
+  │
+  └── Gemini → POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
+      ├── OAuth 2.0 / API Key
+      └── Body: { contents[{role:"user",parts[{text}]}], systemInstruction{parts[{text}]} }</div>
+</div>
+
+<!-------------------------------------------------------------------->
+<h2 id="plugins">8. Tauri 插件清单</h2>
+
+<div class="card">
+<table>
+<tr><th>插件</th><th>用途</th><th>位置 (4/4)</th></tr>
+<tr><td>tauri-plugin-log</td><td>Rust 日志输出 (文件+stdout)</td><td>✅</td></tr>
+<tr><td>tauri-plugin-dialog</td><td>系统对话框 (打开/保存文件)</td><td>✅</td></tr>
+<tr><td>tauri-plugin-shell</td><td>Shell 命令执行</td><td>✅</td></tr>
+<tr><td>tauri-plugin-process</td><td>进程管理</td><td>✅</td></tr>
+<tr><td>tauri-plugin-updater</td><td>应用自动更新</td><td>✅</td></tr>
+<tr><td>tauri-plugin-global-shortcut</td><td>全局快捷键 (⌘⇧Y, ⌘⇧C)</td><td>✅</td></tr>
+<tr><td>tauri-plugin-clipboard-manager</td><td>剪贴板读写</td><td>✅</td></tr>
+<tr><td>tauri-plugin-fs</td><td>文件系统访问</td><td>✅</td></tr>
+</table>
+<p style="margin-top:12px;font-size:12px;color:var(--muted)">按项目规范，每个插件必须在 4 处同步注册: package.json / Cargo.toml / lib.rs / capabilities/default.json</p>
+</div>
+
+<p style="text-align:center;margin-top:48px;color:var(--muted);font-size:12px">
+  LearnWiki v0.0.1 · Generated 2026-06-12 · <a href="https://github.com/kdsz001/LearnWiki">GitHub</a>
+</p>
+
+</div>
+</body>
+</html>

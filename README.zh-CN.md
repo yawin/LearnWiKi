@@ -18,19 +18,10 @@
   隐私优先 — 所有数据存储在本地 SQLite 数据库。
 </p>
 
-## 📸 截图
-
-| 内容捕获 | 知识库 |
-|:---:|:---:|
-| ![内容](docs/screenshots/content.png) | ![知识库](docs/screenshots/wiki.png) |
-
-| 知识图谱 | 深度洞察 |
-|:---:|:---:|
-| ![图谱](docs/screenshots/graph.png) | ![洞察](docs/screenshots/insights.png) |
-
 ## 核心功能
 
 ### 📋 捕获浮窗
+
 - 复制内容时桌面弹出浮窗（默认 10 秒后消失）
 - **只有你主动选择收藏的内容才会保存**，不会偷偷囤积
 - 支持文本、图片、URL，自动识别来源应用
@@ -38,41 +29,38 @@
 - macOS 使用 `⌘⇧C`、Windows 使用 `Ctrl+Shift+C` 可随时手动呼出捕获窗口
 
 ### 📂 内容管理
+
 - 按类型（文本 / 图片 / 链接）和时间范围过滤
 - 全局搜索，跨内容和知识库同时检索
 - 日历时间线视图，按天浏览历史
 - 一键导出为 Markdown 文件
 
 ### 🧠 AI 知识库
+
 - AI 自动将捕获内容编译为 Wiki 页面（概念、实体、主题）
 - 知识图谱可视化，看见概念之间的关联
 - **Ask 侧栏** — 向你的知识库提问，AI 基于你的内容回答
 - 自动检测孤立页面、断裂链接等结构问题
 
 ### 📊 洞察报告
+
 - 一键生成 AI 周报，汇总本周捕获内容
 - **注意力分析** — 7 维度洞察你的信息习惯：
-    - 一瞥总览 / 潜意识 / 遗忘墓地 / 盲区 / 热点 / 热力图 / 行动建议
+  - 一瞥总览 / 潜意识 / 遗忘墓地 / 盲区 / 热点 / 热力图 / 行动建议
 - 对报告内容点赞或忽略，AI 学习你的偏好
 
 ### ⚙️ AI 提供商
+
 - 支持 **Anthropic (Claude)** / **OpenAI** / **Google Gemini**
 - API Key 或 OAuth 登录，两种接入方式
 - 可为每个提供商选择不同模型
 
 ### 🖥 桌面体验
+
 - 系统托盘常驻，关闭窗口不退出
 - macOS 使用 `⌘⇧Y`、Windows 使用 `Ctrl+Shift+Y` 唤起主窗口
 - 深色 / 浅色 / 跟随系统主题
 - MCP 协议集成，可连接 Claude Desktop
-
-## 下载安装
-
-- macOS (Apple Silicon): 下载下方的 `LearnWiki_X.Y.Z_aarch64.dmg`
-- macOS (Intel): 下载下方的 `LearnWiki_X.Y.Z_x64.dmg`
-- Windows (x64): 下载 `LearnWiki_X.Y.Z_x64-setup.exe`（推荐）或 `LearnWiki_X.Y.Z_x64_en-US.msi`
-
-👉 [前往 Release 页面下载](https://github.com/kdsz001/LearnWiki/releases)
 
 ### ⚠️ 首次打开指南（重要）
 
@@ -100,13 +88,14 @@ Windows 版本暂未进行代码签名，首次运行时 Microsoft Defender Smar
 
 以下功能需要额外安装工具，不影响其他功能使用：
 
-| 功能 | 需要安装 | 安装方式 |
-|---|---|---|
+| 功能             | 需要安装         | 安装方式                                                 |
+| ---------------- | ---------------- | -------------------------------------------------------- |
 | YouTube 字幕抓取 | yt-dlp + Node.js | `pip3 install yt-dlp` + [nodejs.org](https://nodejs.org) |
 
 ## 开发指南
 
 ### 前置要求
+
 - Node.js 18+
 - Rust (最新 stable)
 - macOS 13+ 或 Windows 10/11
@@ -117,7 +106,7 @@ Windows 版本暂未进行代码签名，首次运行时 Microsoft Defender Smar
 
 ```bash
 # 克隆仓库
-git clone https://github.com/kdsz001/LearnWiki.git
+git clone https://github.com/yawin/LearnWiKi.git
 cd LearnWiki
 
 # 安装依赖
